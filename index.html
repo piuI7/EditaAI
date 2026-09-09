@@ -1,1 +1,192 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EditaAI</title>
 
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: #0b0b0f;
+      color: white;
+      min-height: 100vh;
+    }
+
+    header {
+      padding: 25px 20px;
+      text-align: center;
+      border-bottom: 1px solid #222;
+    }
+
+    .logo {
+      font-size: 32px;
+      font-weight: bold;
+    }
+
+    .logo span {
+      color: #7c3aed;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: auto;
+      padding: 30px 20px;
+    }
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      color: #999;
+      margin-bottom: 25px;
+    }
+
+    .upload {
+      border: 2px dashed #444;
+      border-radius: 20px;
+      padding: 45px 20px;
+      text-align: center;
+      background: #111116;
+      cursor: pointer;
+      transition: .2s;
+    }
+
+    .upload:hover {
+      border-color: #7c3aed;
+    }
+
+    .upload-icon {
+      font-size: 45px;
+      margin-bottom: 15px;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    .preview {
+      width: 100%;
+      margin-top: 20px;
+      border-radius: 15px;
+      display: none;
+    }
+
+    .prompt {
+      width: 100%;
+      margin-top: 20px;
+      padding: 16px;
+      border-radius: 12px;
+      border: 1px solid #333;
+      background: #15151b;
+      color: white;
+      outline: none;
+      font-size: 16px;
+    }
+
+    .button {
+      width: 100%;
+      margin-top: 15px;
+      padding: 16px;
+      border: none;
+      border-radius: 12px;
+      background: #7c3aed;
+      color: white;
+      font-size: 17px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .button:active {
+      transform: scale(.98);
+    }
+
+    .status {
+      text-align: center;
+      margin-top: 15px;
+      color: #999;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="logo">Edita<span>AI</span></div>
+  </header>
+
+  <main class="container">
+
+    <h1>Edite suas fotos com IA</h1>
+
+    <p class="subtitle">
+      Envie uma foto e diga o que você quer mudar.
+    </p>
+
+    <label class="upload">
+      <input type="file" id="photo" accept="image/*">
+      <div class="upload-icon">📷</div>
+      <strong>Escolher uma foto</strong>
+      <p style="color:#777; margin-top:8px;">
+        Toque aqui para enviar
+      </p>
+    </label>
+
+    <img id="preview" class="preview">
+
+    <input
+      id="prompt"
+      class="prompt"
+      type="text"
+      placeholder="Ex: remova a pessoa da foto..."
+    >
+
+    <button class="button" onclick="editar()">
+      ✨ Editar com IA
+    </button>
+
+    <div id="status" class="status"></div>
+
+  </main>
+
+  <script>
+    const photo = document.getElementById("photo");
+    const preview = document.getElementById("preview");
+
+    photo.addEventListener("change", function() {
+      const file = this.files[0];
+
+      if (file) {
+        preview.src = URL.createObjectURL(file);
+        preview.style.display = "block";
+      }
+    });
+
+    function editar() {
+      const prompt = document.getElementById("prompt").value;
+      const status = document.getElementById("status");
+
+      if (!photo.files[0]) {
+        status.innerText = "Escolha uma foto primeiro.";
+        return;
+      }
+
+      if (!prompt) {
+        status.innerText = "Digite o que você quer editar.";
+        return;
+      }
+
+      status.innerText = "🤖 Preparando a edição com IA...";
+    }
+  </script>
+
+</body>
+</html>
