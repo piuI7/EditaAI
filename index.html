@@ -1,1749 +1,1664 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <meta name="theme-color" content="#0a0a0a">
-  <meta name="description" content="EditaAI — edite suas fotos com inteligência artificial.">
-
-  <title>EditaAI — Editor de Fotos com IA</title>
-
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    :root {
-      --bg: #070707;
-      --bg2: #101010;
-      --card: rgba(25, 25, 25, 0.72);
-      --orange: #ff6a00;
-      --orange2: #ff9d42;
-      --white: #ffffff;
-      --gray: #a4a4a4;
-      --line: rgba(255, 255, 255, 0.09);
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
-
-    body {
-      font-family: Arial, Helvetica, sans-serif;
-      color: var(--white);
-      background:
-        radial-gradient(circle at 80% 5%, rgba(255,106,0,.18), transparent 28%),
-        radial-gradient(circle at 10% 40%, rgba(255,106,0,.08), transparent 25%),
-        linear-gradient(135deg, #050505, #111111 50%, #070707);
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    body::before {
-      content: "";
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      background-image:
-        linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
-      background-size: 45px 45px;
-      mask-image: linear-gradient(to bottom, black, transparent);
-      z-index: -1;
-    }
-
-    a {
-      color: inherit;
-      text-decoration: none;
-    }
-
-    button,
-    input,
-    textarea {
-      font: inherit;
-    }
-
-    .container {
-      width: min(1180px, calc(100% - 32px));
-      margin: auto;
-    }
-
-    /* NAV */
-
-    nav {
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      backdrop-filter: blur(18px);
-      background: rgba(5,5,5,.78);
-      border-bottom: 1px solid var(--line);
-    }
-
-    .nav-inner {
-      min-height: 72px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 20px;
-    }
-
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 23px;
-      font-weight: 900;
-      letter-spacing: -.8px;
-    }
-
-    .logo-dot {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: var(--orange);
-      box-shadow: 0 0 18px var(--orange);
-    }
-
-    .nav-links {
-      display: flex;
-      gap: 28px;
-      color: #cfcfcf;
-      font-size: 14px;
-    }
-
-    .nav-links a:hover {
-      color: var(--orange2);
-    }
-
-    .nav-button {
-      border: 1px solid rgba(255,106,0,.4);
-      background: rgba(255,106,0,.08);
-      color: white;
-      padding: 10px 16px;
-      border-radius: 12px;
-      cursor: pointer;
-    }
-
-    /* HERO */
-
-    .hero {
-      min-height: 650px;
-      display: grid;
-      grid-template-columns: 1.05fr .95fr;
-      align-items: center;
-      gap: 40px;
-      padding: 70px 0 55px;
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 13px;
-      border: 1px solid rgba(255,106,0,.3);
-      background: rgba(255,106,0,.07);
-      border-radius: 999px;
-      color: #ffb36e;
-      font-size: 13px;
-      margin-bottom: 22px;
-    }
-
-    .badge span {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: var(--orange);
-      box-shadow: 0 0 12px var(--orange);
-    }
-
-    h1 {
-      font-size: clamp(45px, 7vw, 82px);
-      line-height: .94;
-      letter-spacing: -4px;
-      max-width: 750px;
-    }
-
-    h1 strong {
-      color: var(--orange);
-      text-shadow: 0 0 35px rgba(255,106,0,.25);
-    }
-
-    .hero-text {
-      color: #aaa;
-      max-width: 620px;
-      line-height: 1.7;
-      margin: 26px 0;
-      font-size: 17px;
-    }
-
-    .hero-actions {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .primary {
-      border: 0;
-      background: linear-gradient(135deg, #ff5a00, #ff8a32);
-      color: white;
-      font-weight: 800;
-      padding: 15px 22px;
-      border-radius: 14px;
-      cursor: pointer;
-      box-shadow: 0 0 35px rgba(255,106,0,.2);
-      transition: .25s;
-    }
-
-    .primary:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 0 45px rgba(255,106,0,.35);
-    }
-
-    .secondary {
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.04);
-      color: white;
-      padding: 15px 22px;
-      border-radius: 14px;
-      cursor: pointer;
-    }
-
-    /* MASCOTE */
-
-    .mascot-area {
-      position: relative;
-      min-height: 480px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .orange-orb {
-      position: absolute;
-      width: 330px;
-      height: 330px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(255,106,0,.34), rgba(255,106,0,.05) 45%, transparent 70%);
-      filter: blur(10px);
-      animation: pulse 4s ease-in-out infinite;
-    }
-
-    .mascot {
-      position: relative;
-      width: min(400px, 80vw);
-      z-index: 2;
-      filter:
-        drop-shadow(0 0 20px rgba(255,106,0,.25))
-        drop-shadow(0 25px 45px rgba(0,0,0,.7));
-      animation: float 4s ease-in-out infinite;
-    }
-
-    .mascot img {
-      width: 100%;
-      display: block;
-      object-fit: contain;
-    }
-
-    .floating-card {
-      position: absolute;
-      z-index: 5;
-      padding: 13px 16px;
-      border: 1px solid rgba(255,255,255,.1);
-      background: rgba(20,20,20,.72);
-      backdrop-filter: blur(15px);
-      border-radius: 15px;
-      box-shadow: 0 15px 40px rgba(0,0,0,.35);
-      font-size: 13px;
-    }
-
-    .floating-card.one {
-      left: 0;
-      top: 90px;
-    }
-
-    .floating-card.two {
-      right: 0;
-      bottom: 100px;
-    }
-
-    .floating-card b {
-      display: block;
-      color: var(--orange2);
-      margin-bottom: 4px;
-    }
-
-    @keyframes float {
-      0%,100% { transform: translateY(0); }
-      50% { transform: translateY(-13px); }
-    }
-
-    @keyframes pulse {
-      0%,100% { transform: scale(1); opacity: .7; }
-      50% { transform: scale(1.12); opacity: 1; }
-    }
-
-    /* SEÇÃO */
-
-    section {
-      padding: 80px 0;
-    }
-
-    .section-head {
-      text-align: center;
-      margin-bottom: 38px;
-    }
-
-    .eyebrow {
-      color: var(--orange);
-      text-transform: uppercase;
-      font-size: 12px;
-      font-weight: 800;
-      letter-spacing: 2px;
-      margin-bottom: 10px;
-    }
-
-    h2 {
-      font-size: clamp(30px, 5vw, 48px);
-      letter-spacing: -2px;
-    }
-
-    .section-head p {
-      color: var(--gray);
-      margin-top: 12px;
-    }
-
-    /* CARDS */
-
-    .features {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-    }
-
-    .feature {
-      background: linear-gradient(145deg, rgba(255,255,255,.07), rgba(255,255,255,.025));
-      border: 1px solid var(--line);
-      border-radius: 22px;
-      padding: 27px;
-      min-height: 190px;
-      transition: .3s;
-      backdrop-filter: blur(15px);
-    }
-
-    .feature:hover {
-      transform: translateY(-6px);
-      border-color: rgba(255,106,0,.35);
-      box-shadow: 0 20px 50px rgba(0,0,0,.3);
-    }
-
-    .feature-icon {
-      font-size: 27px;
-      margin-bottom: 20px;
-    }
-
-    .feature h3 {
-      margin-bottom: 10px;
-    }
-
-    .feature p {
-      color: #999;
-      line-height: 1.6;
-      font-size: 14px;
-    }
-
-    /* EDITOR */
-
-    .editor-wrap {
-      background:
-        linear-gradient(145deg, rgba(255,255,255,.075), rgba(255,255,255,.025));
-      border: 1px solid rgba(255,255,255,.1);
-      border-radius: 28px;
-      padding: 25px;
-      box-shadow: 0 35px 90px rgba(0,0,0,.4);
-      backdrop-filter: blur(20px);
-    }
-
-    .editor-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-    }
-
-    .panel {
-      background: rgba(5,5,5,.55);
-      border: 1px solid var(--line);
-      border-radius: 20px;
-      padding: 20px;
-    }
-
-    .panel-title {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 15px;
-    }
-
-    .panel-title small {
-      color: #777;
-    }
-
-    .dropzone {
-      min-height: 310px;
-      border: 1.5px dashed rgba(255,106,0,.42);
-      border-radius: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 25px;
-      cursor: pointer;
-      transition: .25s;
-      position: relative;
-      overflow: hidden;
-      background:
-        radial-gradient(circle at center, rgba(255,106,0,.08), transparent 55%);
-    }
-
-    .dropzone:hover,
-    .dropzone.dragover {
-      border-color: var(--orange);
-      background: rgba(255,106,0,.08);
-      box-shadow: inset 0 0 50px rgba(255,106,0,.04);
-    }
-
-    .upload-icon {
-      font-size: 45px;
-      margin-bottom: 12px;
-    }
-
-    .dropzone h3 {
-      margin-bottom: 8px;
-    }
-
-    .dropzone p {
-      color: #888;
-      font-size: 13px;
-    }
-
-    .file-button {
-      display: inline-block;
-      margin-top: 18px;
-      background: rgba(255,106,0,.12);
-      border: 1px solid rgba(255,106,0,.35);
-      padding: 11px 15px;
-      border-radius: 11px;
-      color: #ffb16c;
-      font-weight: 700;
-    }
-
-    #fileInput {
-      display: none;
-    }
-
-    .preview-box {
-      min-height: 310px;
-      border-radius: 18px;
-      border: 1px solid var(--line);
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #090909;
-      position: relative;
-    }
-
-    .preview-box img {
-      width: 100%;
-      height: 310px;
-      object-fit: contain;
-      display: none;
-    }
-
-    .preview-empty {
-      color: #666;
-      text-align: center;
-      padding: 25px;
-    }
-
-    .preview-empty strong {
-      display: block;
-      color: #999;
-      margin-bottom: 7px;
-    }
-
-    .remove-photo {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      display: none;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.7);
-      color: white;
-      padding: 8px 11px;
-      border-radius: 10px;
-      cursor: pointer;
-      z-index: 4;
-    }
-
-    .prompt-area {
-      margin-top: 20px;
-    }
-
-    textarea {
-      width: 100%;
-      min-height: 110px;
-      resize: vertical;
-      background: #0b0b0b;
-      border: 1px solid var(--line);
-      color: white;
-      border-radius: 15px;
-      padding: 16px;
-      outline: none;
-      transition: .2s;
-    }
-
-    textarea:focus {
-      border-color: rgba(255,106,0,.6);
-      box-shadow: 0 0 25px rgba(255,106,0,.08);
-    }
-
-    .suggestions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-top: 11px;
-    }
-
-    .chip {
-      background: rgba(255,255,255,.045);
-      color: #bdbdbd;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      padding: 8px 11px;
-      cursor: pointer;
-      font-size: 12px;
-      transition: .2s;
-    }
-
-    .chip:hover {
-      color: white;
-      border-color: rgba(255,106,0,.5);
-      background: rgba(255,106,0,.08);
-    }
-
-    .editor-footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 15px;
-      margin-top: 18px;
-    }
-
-    .counter {
-      color: #666;
-      font-size: 12px;
-    }
-
-    .ai-button {
-      position: relative;
-      overflow: hidden;
-      border: 0;
-      background: linear-gradient(135deg, #ff5700, #ff8c3a);
-      color: white;
-      font-weight: 900;
-      padding: 15px 23px;
-      border-radius: 14px;
-      cursor: pointer;
-      box-shadow: 0 0 30px rgba(255,106,0,.2);
-    }
-
-    .ai-button::after {
-      content: "";
-      position: absolute;
-      top: -50%;
-      left: -80%;
-      width: 45%;
-      height: 200%;
-      background: rgba(255,255,255,.3);
-      transform: rotate(20deg);
-      animation: shine 3.5s infinite;
-    }
-
-    @keyframes shine {
-      0%,55% { left: -80%; }
-      80%,100% { left: 130%; }
-    }
-
-    .ai-button.loading {
-      opacity: .75;
-      pointer-events: none;
-    }
-
-    /* PROCESSAMENTO */
-
-    .process {
-      display: none;
-      margin-top: 20px;
-      padding: 18px;
-      border-radius: 16px;
-      border: 1px solid rgba(255,106,0,.22);
-      background: rgba(255,106,0,.045);
-    }
-
-    .process.show {
-      display: block;
-    }
-
-    .process-top {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 12px;
-      font-size: 13px;
-    }
-
-    .process-top span:last-child {
-      color: var(--orange2);
-    }
-
-    .bar {
-      height: 7px;
-      border-radius: 99px;
-      background: #222;
-      overflow: hidden;
-    }
-
-    .bar-fill {
-      height: 100%;
-      width: 0%;
-      border-radius: inherit;
-      background: linear-gradient(90deg, #ff5100, #ffad63);
-      transition: width .5s;
-      box-shadow: 0 0 15px rgba(255,106,0,.5);
-    }
-
-    /* RESULTADO */
-
-    .before-after {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-    }
-
-    .result-card {
-      position: relative;
-      min-height: 350px;
-      overflow: hidden;
-      border-radius: 22px;
-      border: 1px solid var(--line);
-      background: #0b0b0b;
-    }
-
-    .result-label {
-      position: absolute;
-      z-index: 3;
-      top: 15px;
-      left: 15px;
-      padding: 7px 11px;
-      border-radius: 9px;
-      background: rgba(0,0,0,.65);
-      backdrop-filter: blur(8px);
-      font-size: 12px;
-      font-weight: 800;
-    }
-
-    .result-card img {
-      width: 100%;
-      height: 350px;
-      object-fit: contain;
-      display: none;
-    }
-
-    .result-placeholder {
-      height: 350px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      color: #555;
-      padding: 25px;
-      text-align: center;
-    }
-
-    .result-placeholder .mini-ghost {
-      width: 80px;
-      opacity: .5;
-      margin-bottom: 15px;
-      filter: drop-shadow(0 0 15px rgba(255,106,0,.2));
-    }
-
-    .result-placeholder b {
-      color: #888;
-      margin-bottom: 7px;
-    }
-
-    /* GALERIA */
-
-    .gallery {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 15px;
-    }
-
-    .gallery-item {
-      height: 220px;
-      border-radius: 20px;
-      border: 1px solid var(--line);
-      overflow: hidden;
-      position: relative;
-      background:
-        radial-gradient(circle at 30% 25%, rgba(255,120,30,.5), transparent 20%),
-        linear-gradient(135deg, #161616, #050505 60%, #25150c);
-      transition: .3s;
-    }
-
-    .gallery-item:nth-child(2) {
-      background:
-        radial-gradient(circle at 70% 35%, rgba(255,106,0,.5), transparent 18%),
-        linear-gradient(145deg, #090909, #1b1b1b, #301609);
-    }
-
-    .gallery-item:nth-child(3) {
-      background:
-        radial-gradient(circle at 50% 70%, rgba(255,150,70,.35), transparent 25%),
-        linear-gradient(135deg, #252525, #080808);
-    }
-
-    .gallery-item:hover {
-      transform: scale(1.02);
-      border-color: rgba(255,106,0,.4);
-    }
-
-    .gallery-content {
-      position: absolute;
-      inset: auto 16px 16px;
-    }
-
-    .gallery-content span {
-      display: inline-block;
-      background: rgba(0,0,0,.65);
-      padding: 7px 9px;
-      border-radius: 8px;
-      font-size: 11px;
-      color: #ddd;
-    }
-
-    /* CTA */
-
-    .cta {
-      text-align: center;
-      border: 1px solid rgba(255,106,0,.2);
-      background:
-        radial-gradient(circle at center, rgba(255,106,0,.12), transparent 60%),
-        rgba(255,255,255,.025);
-      border-radius: 30px;
-      padding: 65px 25px;
-      overflow: hidden;
-      position: relative;
-    }
-
-    .cta h2 {
-      max-width: 700px;
-      margin: auto;
-    }
-
-    .cta p {
-      color: #999;
-      margin: 15px auto 25px;
-      max-width: 600px;
-      line-height: 1.6;
-    }
-
-    /* FOOTER */
-
-    footer {
-      border-top: 1px solid var(--line);
-      padding: 30px 0;
-      color: #666;
-      font-size: 13px;
-    }
-
-    .footer-inner {
-      display: flex;
-      justify-content: space-between;
-      gap: 20px;
-    }
-
-    /* TOAST */
-
-    .toast {
-      position: fixed;
-      right: 18px;
-      bottom: 18px;
-      z-index: 100;
-      max-width: 340px;
-      padding: 14px 17px;
-      background: rgba(20,20,20,.92);
-      border: 1px solid rgba(255,106,0,.3);
-      backdrop-filter: blur(15px);
-      border-radius: 14px;
-      box-shadow: 0 15px 45px rgba(0,0,0,.5);
-      transform: translateY(120px);
-      opacity: 0;
-      transition: .35s;
-      color: #ddd;
-      font-size: 13px;
-    }
-
-    .toast.show {
-      transform: translateY(0);
-      opacity: 1;
-    }
-
-    /* RESPONSIVO */
-
-    @media (max-width: 850px) {
-      .nav-links {
-        display: none;
-      }
-
-      .hero {
-        grid-template-columns: 1fr;
-        text-align: center;
-        padding-top: 45px;
-      }
-
-      .hero-text {
-        margin-left: auto;
-        margin-right: auto;
-      }
-
-      .hero-actions {
-        justify-content: center;
-      }
-
-      .mascot-area {
-        min-height: 390px;
-      }
-
-      .floating-card.one {
-        left: 5%;
-      }
-
-      .floating-card.two {
-        right: 5%;
-      }
-
-      .features {
-        grid-template-columns: 1fr;
-      }
-
-      .editor-grid,
-      .before-after {
-        grid-template-columns: 1fr;
-      }
-
-      .gallery {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    @media (max-width: 560px) {
-      .container {
-        width: min(100% - 22px, 1180px);
-      }
-
-      .nav-inner {
-        min-height: 64px;
-      }
-
-      .nav-button {
-        padding: 8px 12px;
-        font-size: 12px;
-      }
-
-      h1 {
-        font-size: 48px;
-        letter-spacing: -2.5px;
-      }
-
-      section {
-        padding: 60px 0;
-      }
-
-      .editor-wrap {
-        padding: 12px;
-        border-radius: 20px;
-      }
-
-      .panel {
-        padding: 13px;
-      }
-
-      .editor-footer {
-        align-items: stretch;
-        flex-direction: column;
-      }
-
-      .ai-button {
-        width: 100%;
-      }
-
-      .floating-card {
-        font-size: 11px;
-        padding: 10px;
-      }
-
-      .floating-card.one {
-        top: 45px;
-      }
-
-      .floating-card.two {
-        bottom: 55px;
-      }
-
-      .mascot {
-        width: 310px;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#080808">
+<meta name="description" content="EditaAI — editor de fotos inteligente.">
+<title>EditaAI — Editor de Fotos com IA</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#070707;
+  --card:rgba(25,25,25,.72);
+  --orange:#ff6500;
+  --orange2:#ff9a45;
+  --white:#fff;
+  --gray:#a5a5a5;
+  --line:rgba(255,255,255,.09);
+}
+
+html{scroll-behavior:smooth}
+
+body{
+  font-family:Arial,Helvetica,sans-serif;
+  color:#fff;
+  background:
+    radial-gradient(circle at 80% 5%,rgba(255,101,0,.18),transparent 28%),
+    radial-gradient(circle at 10% 40%,rgba(255,101,0,.08),transparent 25%),
+    linear-gradient(135deg,#050505,#111 50%,#070707);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+body:before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background-image:
+    linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px);
+  background-size:45px 45px;
+  mask-image:linear-gradient(to bottom,black,transparent);
+  z-index:-1;
+}
+
+button,input,textarea{font:inherit}
+button{cursor:pointer}
+a{text-decoration:none;color:inherit}
+
+.container{
+  width:min(1180px,calc(100% - 30px));
+  margin:auto;
+}
+
+/* NAV */
+
+nav{
+  position:sticky;
+  top:0;
+  z-index:50;
+  backdrop-filter:blur(18px);
+  background:rgba(5,5,5,.78);
+  border-bottom:1px solid var(--line);
+}
+
+.nav-inner{
+  min-height:70px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.logo{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:23px;
+  font-weight:900;
+}
+
+.logo-dot{
+  width:11px;
+  height:11px;
+  border-radius:50%;
+  background:var(--orange);
+  box-shadow:0 0 18px var(--orange);
+}
+
+.nav-links{
+  display:flex;
+  gap:28px;
+  color:#bbb;
+  font-size:14px;
+}
+
+.nav-links a:hover{color:var(--orange2)}
+
+.nav-button{
+  border:1px solid rgba(255,101,0,.4);
+  background:rgba(255,101,0,.08);
+  color:#fff;
+  padding:10px 16px;
+  border-radius:12px;
+}
+
+/* HERO */
+
+.hero{
+  min-height:650px;
+  display:grid;
+  grid-template-columns:1.05fr .95fr;
+  align-items:center;
+  gap:40px;
+  padding:65px 0 50px;
+}
+
+.badge{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 13px;
+  border:1px solid rgba(255,101,0,.3);
+  background:rgba(255,101,0,.07);
+  border-radius:999px;
+  color:#ffb16c;
+  font-size:13px;
+  margin-bottom:22px;
+}
+
+.badge span{
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:var(--orange);
+  box-shadow:0 0 12px var(--orange);
+}
+
+h1{
+  font-size:clamp(45px,7vw,82px);
+  line-height:.94;
+  letter-spacing:-4px;
+}
+
+h1 strong{
+  color:var(--orange);
+  text-shadow:0 0 35px rgba(255,101,0,.3);
+}
+
+.hero-text{
+  color:#aaa;
+  max-width:620px;
+  line-height:1.7;
+  margin:26px 0;
+  font-size:17px;
+}
+
+.hero-actions{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+.primary{
+  border:0;
+  background:linear-gradient(135deg,#ff5700,#ff913c);
+  color:#fff;
+  font-weight:800;
+  padding:15px 22px;
+  border-radius:14px;
+  box-shadow:0 0 35px rgba(255,101,0,.2);
+  transition:.25s;
+}
+
+.primary:hover{
+  transform:translateY(-3px);
+  box-shadow:0 0 45px rgba(255,101,0,.35);
+}
+
+.secondary{
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.04);
+  color:#fff;
+  padding:15px 22px;
+  border-radius:14px;
+}
+
+/* MASCOTE */
+
+.mascot-area{
+  position:relative;
+  min-height:480px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.orange-orb{
+  position:absolute;
+  width:330px;
+  height:330px;
+  border-radius:50%;
+  background:radial-gradient(
+    circle,
+    rgba(255,101,0,.34),
+    rgba(255,101,0,.05) 45%,
+    transparent 70%
+  );
+  filter:blur(10px);
+  animation:pulse 4s ease-in-out infinite;
+}
+
+.mascot{
+  position:relative;
+  width:min(400px,80vw);
+  z-index:2;
+  filter:
+    drop-shadow(0 0 20px rgba(255,101,0,.25))
+    drop-shadow(0 25px 45px rgba(0,0,0,.7));
+  animation:float 4s ease-in-out infinite;
+}
+
+.mascot img{
+  width:100%;
+  display:block;
+  object-fit:contain;
+}
+
+.floating-card{
+  position:absolute;
+  z-index:5;
+  padding:13px 16px;
+  border:1px solid rgba(255,255,255,.1);
+  background:rgba(20,20,20,.72);
+  backdrop-filter:blur(15px);
+  border-radius:15px;
+  box-shadow:0 15px 40px rgba(0,0,0,.35);
+  font-size:13px;
+}
+
+.floating-card.one{
+  left:0;
+  top:90px;
+}
+
+.floating-card.two{
+  right:0;
+  bottom:100px;
+}
+
+.floating-card b{
+  display:block;
+  color:var(--orange2);
+  margin-bottom:4px;
+}
+
+@keyframes float{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-13px)}
+}
+
+@keyframes pulse{
+  0%,100%{transform:scale(1);opacity:.7}
+  50%{transform:scale(1.12);opacity:1}
+}
+
+/* SEÇÕES */
+
+section{padding:80px 0}
+
+.section-head{
+  text-align:center;
+  margin-bottom:38px;
+}
+
+.eyebrow{
+  color:var(--orange);
+  text-transform:uppercase;
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:2px;
+  margin-bottom:10px;
+}
+
+h2{
+  font-size:clamp(30px,5vw,48px);
+  letter-spacing:-2px;
+}
+
+.section-head p{
+  color:var(--gray);
+  margin-top:12px;
+}
+
+/* RECURSOS */
+
+.features{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:16px;
+}
+
+.feature{
+  background:
+    linear-gradient(145deg,rgba(255,255,255,.07),rgba(255,255,255,.025));
+  border:1px solid var(--line);
+  border-radius:22px;
+  padding:27px;
+  min-height:190px;
+  transition:.3s;
+  backdrop-filter:blur(15px);
+}
+
+.feature:hover{
+  transform:translateY(-6px);
+  border-color:rgba(255,101,0,.35);
+  box-shadow:0 20px 50px rgba(0,0,0,.3);
+}
+
+.feature-icon{
+  font-size:27px;
+  margin-bottom:20px;
+}
+
+.feature h3{margin-bottom:10px}
+
+.feature p{
+  color:#999;
+  line-height:1.6;
+  font-size:14px;
+}
+
+/* EDITOR */
+
+.editor-wrap{
+  background:
+    linear-gradient(145deg,rgba(255,255,255,.075),rgba(255,255,255,.025));
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:28px;
+  padding:25px;
+  box-shadow:0 35px 90px rgba(0,0,0,.4);
+  backdrop-filter:blur(20px);
+}
+
+.editor-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px;
+}
+
+.panel{
+  background:rgba(5,5,5,.55);
+  border:1px solid var(--line);
+  border-radius:20px;
+  padding:20px;
+}
+
+.panel-title{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:15px;
+}
+
+.panel-title small{
+  color:#777;
+}
+
+.dropzone{
+  min-height:310px;
+  border:1.5px dashed rgba(255,101,0,.42);
+  border-radius:18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:25px;
+  cursor:pointer;
+  transition:.25s;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at center,rgba(255,101,0,.08),transparent 55%);
+}
+
+.dropzone:hover,
+.dropzone.dragover{
+  border-color:var(--orange);
+  background:rgba(255,101,0,.08);
+  box-shadow:inset 0 0 50px rgba(255,101,0,.04);
+}
+
+.upload-icon{
+  font-size:45px;
+  margin-bottom:12px;
+}
+
+.dropzone h3{margin-bottom:8px}
+
+.dropzone p{
+  color:#888;
+  font-size:13px;
+}
+
+.file-button{
+  display:inline-block;
+  margin-top:18px;
+  background:rgba(255,101,0,.12);
+  border:1px solid rgba(255,101,0,.35);
+  padding:11px 15px;
+  border-radius:11px;
+  color:#ffb16c;
+  font-weight:700;
+}
+
+#fileInput{display:none}
+
+.preview-box{
+  min-height:310px;
+  border-radius:18px;
+  border:1px solid var(--line);
+  overflow:hidden;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#090909;
+  position:relative;
+}
+
+.preview-box img{
+  width:100%;
+  height:310px;
+  object-fit:contain;
+  display:none;
+}
+
+.preview-empty{
+  color:#666;
+  text-align:center;
+  padding:25px;
+}
+
+.preview-empty strong{
+  display:block;
+  color:#999;
+  margin-bottom:7px;
+}
+
+.remove-photo{
+  position:absolute;
+  top:12px;
+  right:12px;
+  display:none;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(0,0,0,.7);
+  color:#fff;
+  padding:8px 11px;
+  border-radius:10px;
+  z-index:4;
+}
+
+.prompt-area{margin-top:20px}
+
+textarea{
+  width:100%;
+  min-height:110px;
+  resize:vertical;
+  background:#0b0b0b;
+  border:1px solid var(--line);
+  color:#fff;
+  border-radius:15px;
+  padding:16px;
+  outline:none;
+  transition:.2s;
+}
+
+textarea:focus{
+  border-color:rgba(255,101,0,.6);
+  box-shadow:0 0 25px rgba(255,101,0,.08);
+}
+
+.suggestions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:11px;
+}
+
+.chip{
+  background:rgba(255,255,255,.045);
+  color:#bdbdbd;
+  border:1px solid var(--line);
+  border-radius:999px;
+  padding:8px 11px;
+  font-size:12px;
+  transition:.2s;
+}
+
+.chip:hover{
+  color:#fff;
+  border-color:rgba(255,101,0,.5);
+  background:rgba(255,101,0,.08);
+}
+
+.editor-footer{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px;
+  margin-top:18px;
+}
+
+.counter{
+  color:#666;
+  font-size:12px;
+}
+
+.ai-button{
+  position:relative;
+  overflow:hidden;
+  border:0;
+  background:linear-gradient(135deg,#ff5700,#ff8c3a);
+  color:#fff;
+  font-weight:900;
+  padding:15px 23px;
+  border-radius:14px;
+  box-shadow:0 0 30px rgba(255,101,0,.2);
+}
+
+.ai-button:after{
+  content:"";
+  position:absolute;
+  top:-50%;
+  left:-80%;
+  width:45%;
+  height:200%;
+  background:rgba(255,255,255,.3);
+  transform:rotate(20deg);
+  animation:shine 3.5s infinite;
+}
+
+@keyframes shine{
+  0%,55%{left:-80%}
+  80%,100%{left:130%}
+}
+
+.ai-button.loading{
+  opacity:.75;
+  pointer-events:none;
+}
+
+/* PROCESSO */
+
+.process{
+  display:none;
+  margin-top:20px;
+  padding:18px;
+  border-radius:16px;
+  border:1px solid rgba(255,101,0,.22);
+  background:rgba(255,101,0,.045);
+}
+
+.process.show{display:block}
+
+.process-top{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:12px;
+  font-size:13px;
+}
+
+.process-top span:last-child{
+  color:var(--orange2);
+}
+
+.bar{
+  height:7px;
+  border-radius:99px;
+  background:#222;
+  overflow:hidden;
+}
+
+.bar-fill{
+  height:100%;
+  width:0;
+  border-radius:inherit;
+  background:linear-gradient(90deg,#ff5100,#ffad63);
+  transition:width .5s;
+  box-shadow:0 0 15px rgba(255,101,0,.5);
+}
+
+/* ANTES / DEPOIS */
+
+.before-after{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+}
+
+.result-card{
+  position:relative;
+  min-height:350px;
+  overflow:hidden;
+  border-radius:22px;
+  border:1px solid var(--line);
+  background:#0b0b0b;
+}
+
+.result-label{
+  position:absolute;
+  z-index:3;
+  top:15px;
+  left:15px;
+  padding:7px 11px;
+  border-radius:9px;
+  background:rgba(0,0,0,.65);
+  backdrop-filter:blur(8px);
+  font-size:12px;
+  font-weight:800;
+}
+
+.result-card>img{
+  width:100%;
+  height:350px;
+  object-fit:contain;
+  display:none;
+}
+
+.result-placeholder{
+  height:350px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  color:#555;
+  padding:25px;
+  text-align:center;
+}
+
+.mini-ghost{
+  width:80px;
+  opacity:.5;
+  margin-bottom:15px;
+  filter:drop-shadow(0 0 15px rgba(255,101,0,.2));
+}
+
+.result-placeholder b{
+  color:#888;
+  margin-bottom:7px;
+}
+
+/* GALERIA */
+
+.gallery{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:15px;
+}
+
+.gallery-item{
+  height:220px;
+  border-radius:20px;
+  border:1px solid var(--line);
+  overflow:hidden;
+  position:relative;
+  background:
+    radial-gradient(circle at 30% 25%,rgba(255,120,30,.5),transparent 20%),
+    linear-gradient(135deg,#161616,#050505 60%,#25150c);
+  transition:.3s;
+}
+
+.gallery-item:nth-child(2){
+  background:
+    radial-gradient(circle at 70% 35%,rgba(255,106,0,.5),transparent 18%),
+    linear-gradient(145deg,#090909,#1b1b1b,#301609);
+}
+
+.gallery-item:nth-child(3){
+  background:
+    radial-gradient(circle at 50% 70%,rgba(255,150,70,.35),transparent 25%),
+    linear-gradient(135deg,#252525,#080808);
+}
+
+.gallery-item:hover{
+  transform:scale(1.02);
+  border-color:rgba(255,101,0,.4);
+}
+
+.gallery-content{
+  position:absolute;
+  inset:auto 16px 16px;
+}
+
+.gallery-content span{
+  display:inline-block;
+  background:rgba(0,0,0,.65);
+  padding:7px 9px;
+  border-radius:8px;
+  font-size:11px;
+  color:#ddd;
+}
+
+/* CTA */
+
+.cta{
+  text-align:center;
+  border:1px solid rgba(255,101,0,.2);
+  background:
+    radial-gradient(circle at center,rgba(255,101,0,.12),transparent 60%),
+    rgba(255,255,255,.025);
+  border-radius:30px;
+  padding:65px 25px;
+}
+
+.cta h2{
+  max-width:700px;
+  margin:auto;
+}
+
+.cta p{
+  color:#999;
+  margin:15px auto 25px;
+  max-width:600px;
+  line-height:1.6;
+}
+
+/* FOOTER */
+
+footer{
+  border-top:1px solid var(--line);
+  padding:30px 0;
+  color:#666;
+  font-size:13px;
+}
+
+.footer-inner{
+  display:flex;
+  justify-content:space-between;
+  gap:20px;
+}
+
+/* TOAST */
+
+.toast{
+  position:fixed;
+  right:18px;
+  bottom:18px;
+  z-index:100;
+  max-width:340px;
+  padding:14px 17px;
+  background:rgba(20,20,20,.92);
+  border:1px solid rgba(255,101,0,.3);
+  backdrop-filter:blur(15px);
+  border-radius:14px;
+  box-shadow:0 15px 45px rgba(0,0,0,.5);
+  transform:translateY(120px);
+  opacity:0;
+  transition:.35s;
+  color:#ddd;
+  font-size:13px;
+}
+
+.toast.show{
+  transform:translateY(0);
+  opacity:1;
+}
+
+/* MOBILE */
+
+@media(max-width:850px){
+
+  .nav-links{display:none}
+
+  .hero{
+    grid-template-columns:1fr;
+    text-align:center;
+    padding-top:45px;
+  }
+
+  .hero-text{
+    margin-left:auto;
+    margin-right:auto;
+  }
+
+  .hero-actions{
+    justify-content:center;
+  }
+
+  .mascot-area{
+    min-height:390px;
+  }
+
+  .floating-card.one{left:5%}
+  .floating-card.two{right:5%}
+
+  .features{
+    grid-template-columns:1fr;
+  }
+
+  .editor-grid,
+  .before-after{
+    grid-template-columns:1fr;
+  }
+
+  .gallery{
+    grid-template-columns:1fr;
+  }
+}
+
+@media(max-width:560px){
+
+  .container{
+    width:calc(100% - 22px);
+  }
+
+  .nav-inner{
+    min-height:64px;
+  }
+
+  .nav-button{
+    padding:8px 12px;
+    font-size:12px;
+  }
+
+  h1{
+    font-size:48px;
+    letter-spacing:-2.5px;
+  }
+
+  section{
+    padding:60px 0;
+  }
+
+  .editor-wrap{
+    padding:12px;
+    border-radius:20px;
+  }
+
+  .panel{
+    padding:13px;
+  }
+
+  .editor-footer{
+    align-items:stretch;
+    flex-direction:column;
+  }
+
+  .ai-button{
+    width:100%;
+  }
+
+  .floating-card{
+    font-size:11px;
+    padding:10px;
+  }
+
+  .floating-card.one{top:45px}
+  .floating-card.two{bottom:55px}
+
+  .mascot{
+    width:310px;
+  }
+}
+</style>
 </head>
 
 <body>
 
-  <!-- NAV -->
-  <nav>
-    <div class="container nav-inner">
-      <a href="#" class="logo">
-        <span class="logo-dot"></span>
-        EditaAI
+<nav>
+  <div class="container nav-inner">
+
+    <a href="#" class="logo">
+      <span class="logo-dot"></span>
+      EditaAI
+    </a>
+
+    <div class="nav-links">
+      <a href="#editor">Editor</a>
+      <a href="#recursos">Recursos</a>
+      <a href="#como-funciona">Como funciona</a>
+    </div>
+
+    <button class="nav-button" onclick="scrollToEditor()">
+      Começar
+    </button>
+
+  </div>
+</nav>
+
+
+<main>
+
+<section class="container hero">
+
+  <div>
+
+    <div class="badge">
+      <span></span>
+      Edição inteligente de fotos
+    </div>
+
+    <h1>
+      Sua foto.<br>
+      Seu estilo.<br>
+      <strong>Do seu jeito.</strong>
+    </h1>
+
+    <p class="hero-text">
+      Transforme suas fotos de forma simples, rápida e criativa.
+      Envie uma imagem, diga o que deseja e prepare sua edição.
+    </p>
+
+    <div class="hero-actions">
+
+      <button class="primary" onclick="scrollToEditor()">
+        ✨ Editar uma foto
+      </button>
+
+      <a href="#como-funciona" class="secondary">
+        Ver como funciona
       </a>
 
-      <div class="nav-links">
-        <a href="#editor">Editor</a>
-        <a href="#recursos">Recursos</a>
-        <a href="#como-funciona">Como funciona</a>
-      </div>
-
-      <button class="nav-button" onclick="scrollToEditor()">
-        Começar
-      </button>
     </div>
-  </nav>
+
+  </div>
 
 
-  <!-- HERO -->
-  <main>
+  <div class="mascot-area">
 
-    <section class="container hero">
+    <div class="orange-orb"></div>
 
-      <div>
-        <div class="badge">
-          <span></span>
-          Edição inteligente de fotos
-        </div>
+    <div class="floating-card one">
+      <b>✨ Inteligente</b>
+      Entende seu pedido
+    </div>
 
-        <h1>
-          Sua foto.<br>
-          Seu estilo.<br>
-          <strong>Do seu jeito.</strong>
-        </h1>
+    <div class="mascot">
+      <img
+        src="058E4835-CF78-47DD-B015-9EC22CEFCF73.png"
+        alt="Mascote do EditaAI"
+      >
+    </div>
 
-        <p class="hero-text">
-          O EditaAI foi criado para transformar suas fotos de forma simples,
-          rápida e criativa. Envie uma imagem, diga o que deseja e prepare
-          sua edição.
+    <div class="floating-card two">
+      <b>⚡ Rápido</b>
+      Edição simplificada
+    </div>
+
+  </div>
+
+</section>
+
+
+<section id="recursos">
+
+  <div class="container">
+
+    <div class="section-head">
+      <div class="eyebrow">Recursos</div>
+      <h2>Tudo para deixar sua foto melhor.</h2>
+      <p>Uma experiência simples, moderna e preparada para IA.</p>
+    </div>
+
+    <div class="features">
+
+      <div class="feature">
+        <div class="feature-icon">✨</div>
+        <h3>Melhore a qualidade</h3>
+        <p>
+          Deixe suas fotos mais nítidas, bonitas e profissionais.
         </p>
-
-        <div class="hero-actions">
-          <button class="primary" onclick="scrollToEditor()">
-            ✨ Editar uma foto
-          </button>
-
-          <a href="#como-funciona" class="secondary">
-            Ver como funciona
-          </a>
-        </div>
       </div>
 
-
-      <div class="mascot-area">
-
-        <div class="orange-orb"></div>
-
-        <div class="floating-card one">
-          <b>✨ Inteligente</b>
-          Entende seu pedido
-        </div>
-
-        <div class="mascot">
-          <img
-            src="fantasma-editaai.png"
-            alt="Mascote do EditaAI"
-          >
-        </div>
-
-        <div class="floating-card two">
-          <b>⚡ Rápido</b>
-          Edição simplificada
-        </div>
-
+      <div class="feature">
+        <div class="feature-icon">👤</div>
+        <h3>Retratos</h3>
+        <p>
+          Prepare seus retratos para terem uma aparência mais profissional.
+        </p>
       </div>
 
-    </section>
-
-
-    <!-- RECURSOS -->
-    <section id="recursos">
-      <div class="container">
-
-        <div class="section-head">
-          <div class="eyebrow">Recursos</div>
-          <h2>Tudo para deixar sua foto melhor.</h2>
-          <p>Uma experiência simples, moderna e preparada para IA.</p>
-        </div>
-
-        <div class="features">
-
-          <div class="feature">
-            <div class="feature-icon">✨</div>
-            <h3>Melhore a qualidade</h3>
-            <p>
-              Prepare suas fotos para ficarem mais nítidas,
-              profissionais e bonitas.
-            </p>
-          </div>
-
-          <div class="feature">
-            <div class="feature-icon">👤</div>
-            <h3>Retratos</h3>
-            <p>
-              Transforme fotos comuns em retratos com aparência
-              mais profissional.
-            </p>
-          </div>
-
-          <div class="feature">
-            <div class="feature-icon">✂️</div>
-            <h3>Remova elementos</h3>
-            <p>
-              Peça para remover objetos, pessoas ou elementos
-              indesejados da imagem.
-            </p>
-          </div>
-
-        </div>
-
+      <div class="feature">
+        <div class="feature-icon">✂️</div>
+        <h3>Remova elementos</h3>
+        <p>
+          Remova objetos, pessoas ou elementos indesejados.
+        </p>
       </div>
-    </section>
+
+    </div>
+
+  </div>
+
+</section>
 
 
-    <!-- EDITOR -->
-    <section id="editor">
-      <div class="container">
+<section id="editor">
 
-        <div class="section-head">
-          <div class="eyebrow">Editor</div>
-          <h2>Vamos editar sua foto.</h2>
-          <p>Envie uma imagem e diga exatamente o que você quer.</p>
-        </div>
+  <div class="container">
 
-
-        <div class="editor-wrap">
-
-          <div class="editor-grid">
-
-            <!-- UPLOAD -->
-            <div class="panel">
-
-              <div class="panel-title">
-                <strong>1. Sua foto</strong>
-                <small>JPG, PNG, WEBP</small>
-              </div>
-
-              <label
-                class="dropzone"
-                id="dropzone"
-                for="fileInput"
-              >
-
-                <input
-                  type="file"
-                  id="fileInput"
-                  accept="image/*"
-                >
-
-                <div>
-                  <div class="upload-icon">📸</div>
-
-                  <h3>Envie sua foto</h3>
-
-                  <p>
-                    Toque aqui ou arraste uma imagem
-                  </p>
-
-                  <span class="file-button">
-                    Escolher foto
-                  </span>
-                </div>
-
-              </label>
-
-            </div>
+    <div class="section-head">
+      <div class="eyebrow">Editor</div>
+      <h2>Vamos editar sua foto.</h2>
+      <p>Envie uma imagem e diga exatamente o que você quer.</p>
+    </div>
 
 
-            <!-- PREVIEW -->
-            <div class="panel">
+    <div class="editor-wrap">
 
-              <div class="panel-title">
-                <strong>2. Visualização</strong>
-                <small id="fileName">Nenhuma foto</small>
-              </div>
+      <div class="editor-grid">
 
-              <div class="preview-box">
+        <div class="panel">
 
-                <button
-                  class="remove-photo"
-                  id="removePhoto"
-                  type="button"
-                >
-                  ✕ Remover
-                </button>
-
-                <img
-                  id="preview"
-                  alt="Pré-visualização da foto"
-                >
-
-                <div
-                  class="preview-empty"
-                  id="previewEmpty"
-                >
-                  <strong>Sua foto aparecerá aqui</strong>
-                  Depois de enviar uma imagem,
-                  você poderá visualizá-la nesta área.
-                </div>
-
-              </div>
-
-            </div>
-
+          <div class="panel-title">
+            <strong>1. Sua foto</strong>
+            <small>JPG, PNG, WEBP</small>
           </div>
 
+          <label class="dropzone" id="dropzone" for="fileInput">
 
-          <!-- PROMPT -->
-          <div class="prompt-area">
-
-            <div class="panel-title">
-              <strong>3. O que você quer fazer?</strong>
-              <small id="counter">0/500</small>
-            </div>
-
-            <textarea
-              id="prompt"
-              maxlength="500"
-              placeholder="Exemplo: melhore a qualidade, deixe a iluminação mais profissional e remova o fundo..."
-            ></textarea>
-
-
-            <div class="suggestions">
-
-              <button class="chip" type="button"
-                data-prompt="Melhore a qualidade da foto e deixe mais nítida.">
-                ✨ Melhorar qualidade
-              </button>
-
-              <button class="chip" type="button"
-                data-prompt="Remova o fundo da foto.">
-                ✂️ Remover fundo
-              </button>
-
-              <button class="chip" type="button"
-                data-prompt="Deixe a foto com aparência profissional.">
-                📸 Profissional
-              </button>
-
-              <button class="chip" type="button"
-                data-prompt="Melhore a iluminação e as cores sem alterar a aparência da pessoa.">
-                💡 Melhorar iluminação
-              </button>
-
-              <button class="chip" type="button"
-                data-prompt="Deixe a foto mais nítida e com aparência de câmera profissional.">
-                🔥 Câmera profissional
-              </button>
-
-            </div>
-
-
-            <div class="editor-footer">
-
-              <div class="counter">
-                O EditaAI está preparado para receber sua edição.
-              </div>
-
-              <button
-                class="ai-button"
-                id="editButton"
-                type="button"
-              >
-                ✨ Editar com IA
-              </button>
-
-            </div>
-
-
-            <!-- PROCESSO -->
-            <div class="process" id="process">
-
-              <div class="process-top">
-                <span id="processText">
-                  Preparando...
-                </span>
-
-                <span id="processPercent">
-                  0%
-                </span>
-              </div>
-
-              <div class="bar">
-                <div
-                  class="bar-fill"
-                  id="barFill"
-                ></div>
-              </div>
-
-            </div>
-
-          </div>
-
-        </div>
-
-      </div>
-    </section>
-
-
-    <!-- ANTES / DEPOIS -->
-    <section id="como-funciona">
-
-      <div class="container">
-
-        <div class="section-head">
-          <div class="eyebrow">Resultado</div>
-          <h2>Antes e depois.</h2>
-          <p>
-            Aqui ficará o resultado produzido pela IA quando
-            a conexão de edição estiver ativa.
-          </p>
-        </div>
-
-
-        <div class="before-after">
-
-          <div class="result-card">
-
-            <div class="result-label">
-              ANTES
-            </div>
-
-            <img id="beforeImage" alt="Imagem original">
-
-            <div
-              class="result-placeholder"
-              id="beforePlaceholder"
+            <input
+              type="file"
+              id="fileInput"
+              accept="image/*"
             >
-              <b>Sua foto original</b>
-              Envie uma imagem no editor acima.
-            </div>
 
-          </div>
+            <div>
 
+              <div class="upload-icon">📸</div>
 
-          <div class="result-card">
+              <h3>Envie sua foto</h3>
 
-            <div class="result-label">
-              RESULTADO DA IA
-            </div>
+              <p>
+                Toque aqui ou arraste uma imagem
+              </p>
 
-            <div class="result-placeholder">
-
-              <img
-                class="mini-ghost"
-                src="fantasma-editaai.png"
-                alt=""
-              >
-
-              <b>Seu resultado aparecerá aqui</b>
-
-              <span>
-                A interface está pronta para receber
-                a conexão com o serviço de IA.
+              <span class="file-button">
+                Escolher foto
               </span>
 
             </div>
 
+          </label>
+
+        </div>
+
+
+        <div class="panel">
+
+          <div class="panel-title">
+            <strong>2. Visualização</strong>
+            <small id="fileName">Nenhuma foto</small>
+          </div>
+
+          <div class="preview-box">
+
+            <button
+              class="remove-photo"
+              id="removePhoto"
+              type="button"
+            >
+              ✕ Remover
+            </button>
+
+            <img
+              id="preview"
+              alt="Pré-visualização da foto"
+            >
+
+            <div
+              class="preview-empty"
+              id="previewEmpty"
+            >
+              <strong>Sua foto aparecerá aqui</strong>
+              Depois de enviar uma imagem,
+              você poderá visualizá-la nesta área.
+            </div>
+
           </div>
 
         </div>
 
       </div>
 
-    </section>
 
+      <div class="prompt-area">
 
-    <!-- GALERIA -->
-    <section>
-
-      <div class="container">
-
-        <div class="section-head">
-          <div class="eyebrow">Possibilidades</div>
-          <h2>Imagine o que dá para criar.</h2>
-          <p>
-            Uma base visual para diferentes tipos de edição.
-          </p>
+        <div class="panel-title">
+          <strong>3. O que você quer fazer?</strong>
+          <small id="counter">0/500</small>
         </div>
 
-
-        <div class="gallery">
-
-          <div class="gallery-item">
-            <div class="gallery-content">
-              <span>✨ Melhoria de qualidade</span>
-            </div>
-          </div>
-
-          <div class="gallery-item">
-            <div class="gallery-content">
-              <span>👤 Retrato profissional</span>
-            </div>
-          </div>
-
-          <div class="gallery-item">
-            <div class="gallery-content">
-              <span>✂️ Remoção de elementos</span>
-            </div>
-          </div>
-
-        </div>
-
-      </div>
-
-    </section>
+        <textarea
+          id="prompt"
+          maxlength="500"
+          placeholder="Exemplo: melhore a qualidade, deixe a iluminação mais profissional e remova o fundo..."
+        ></textarea>
 
 
-    <!-- CTA -->
-    <section>
-
-      <div class="container">
-
-        <div class="cta">
-
-          <div class="eyebrow">
-            EditaAI
-          </div>
-
-          <h2>
-            Sua próxima foto pode começar aqui.
-          </h2>
-
-          <p>
-            Envie uma imagem e experimente a interface
-            do seu novo editor de fotos.
-          </p>
+        <div class="suggestions">
 
           <button
-            class="primary"
-            onclick="scrollToEditor()"
+            class="chip"
+            type="button"
+            data-prompt="Melhore a qualidade da foto e deixe mais nítida."
           >
-            🚀 Começar agora
+            ✨ Melhorar qualidade
+          </button>
+
+          <button
+            class="chip"
+            type="button"
+            data-prompt="Remova o fundo da foto."
+          >
+            ✂️ Remover fundo
+          </button>
+
+          <button
+            class="chip"
+            type="button"
+            data-prompt="Deixe a foto com aparência profissional."
+          >
+            📸 Profissional
+          </button>
+
+          <button
+            class="chip"
+            type="button"
+            data-prompt="Melhore a iluminação e as cores sem alterar a aparência da pessoa."
+          >
+            💡 Melhorar iluminação
+          </button>
+
+          <button
+            class="chip"
+            type="button"
+            data-prompt="Deixe a foto mais nítida e com aparência de câmera profissional."
+          >
+            🔥 Câmera profissional
           </button>
 
         </div>
 
-      </div>
 
-    </section>
+        <div class="editor-footer">
 
-  </main>
+          <div class="counter">
+            O EditaAI está preparado para receber sua edição.
+          </div>
+
+          <button
+            class="ai-button"
+            id="editButton"
+            type="button"
+          >
+            ✨ Editar com IA
+          </button>
+
+        </div>
 
 
-  <!-- FOOTER -->
-  <footer>
+        <div class="process" id="process">
 
-    <div class="container footer-inner">
+          <div class="process-top">
 
-      <div>
-        © 2026 EditaAI
-      </div>
+            <span id="processText">
+              Preparando...
+            </span>
 
-      <div>
-        Feito para transformar suas fotos ✨
+            <span id="processPercent">
+              0%
+            </span>
+
+          </div>
+
+          <div class="bar">
+            <div
+              class="bar-fill"
+              id="barFill"
+            ></div>
+          </div>
+
+        </div>
+
       </div>
 
     </div>
 
-  </footer>
+  </div>
+
+</section>
 
 
-  <!-- TOAST -->
-  <div
-    class="toast"
-    id="toast"
-  ></div>
+<section id="como-funciona">
+
+  <div class="container">
+
+    <div class="section-head">
+
+      <div class="eyebrow">Resultado</div>
+
+      <h2>Antes e depois.</h2>
+
+      <p>
+        O resultado produzido pela IA aparecerá aqui quando
+        o motor de edição estiver conectado.
+      </p>
+
+    </div>
 
 
-  <script>
+    <div class="before-after">
 
-    const fileInput = document.getElementById("fileInput");
-    const dropzone = document.getElementById("dropzone");
-    const preview = document.getElementById("preview");
-    const previewEmpty = document.getElementById("previewEmpty");
-    const removePhoto = document.getElementById("removePhoto");
-    const fileName = document.getElementById("fileName");
+      <div class="result-card">
 
-    const prompt = document.getElementById("prompt");
-    const counter = document.getElementById("counter");
+        <div class="result-label">
+          ANTES
+        </div>
 
-    const editButton = document.getElementById("editButton");
+        <img
+          id="beforeImage"
+          alt="Imagem original"
+        >
 
-    const process = document.getElementById("process");
-    const processText = document.getElementById("processText");
-    const processPercent = document.getElementById("processPercent");
-    const barFill = document.getElementById("barFill");
+        <div
+          class="result-placeholder"
+          id="beforePlaceholder"
+        >
+          <b>Sua foto original</b>
+          Envie uma imagem no editor acima.
+        </div>
 
-    const beforeImage = document.getElementById("beforeImage");
-    const beforePlaceholder =
-      document.getElementById("beforePlaceholder");
-
-    const toast = document.getElementById("toast");
+      </div>
 
 
-    let selectedFile = null;
+      <div class="result-card">
+
+        <div class="result-label">
+          RESULTADO DA IA
+        </div>
+
+        <div class="result-placeholder">
+
+          <img
+            class="mini-ghost"
+            src="058E4835-CF78-47DD-B015-9EC22CEFCF73.png"
+            alt=""
+          >
+
+          <b>Seu resultado aparecerá aqui</b>
+
+          <span>
+            A área está preparada para receber
+            a edição da IA.
+          </span>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
 
 
-    /* TOAST */
+<section>
 
-    function showToast(message) {
+  <div class="container">
 
-      toast.textContent = message;
-      toast.classList.add("show");
+    <div class="section-head">
 
-      setTimeout(() => {
-        toast.classList.remove("show");
-      }, 3000);
-    }
+      <div class="eyebrow">Possibilidades</div>
 
+      <h2>Imagine o que dá para criar.</h2>
 
-    /* SCROLL */
+      <p>
+        Uma base visual para diferentes tipos de edição.
+      </p>
 
-    function scrollToEditor() {
-
-      document
-        .getElementById("editor")
-        .scrollIntoView({
-          behavior: "smooth"
-        });
-
-    }
+    </div>
 
 
-    /* FOTO */
+    <div class="gallery">
 
-    function handleFile(file) {
+      <div class="gallery-item">
+        <div class="gallery-content">
+          <span>✨ Melhoria de qualidade</span>
+        </div>
+      </div>
 
-      if (!file) return;
+      <div class="gallery-item">
+        <div class="gallery-content">
+          <span>👤 Retrato profissional</span>
+        </div>
+      </div>
 
-      if (!file.type.startsWith("image/")) {
+      <div class="gallery-item">
+        <div class="gallery-content">
+          <span>✂️ Remoção de elementos</span>
+        </div>
+      </div>
 
-        showToast("Escolha uma imagem válida.");
+    </div>
 
-        return;
-      }
+  </div>
 
-
-      if (file.size > 10 * 1024 * 1024) {
-
-        showToast("A imagem precisa ter no máximo 10 MB.");
-
-        return;
-      }
-
-
-      selectedFile = file;
-
-      const url = URL.createObjectURL(file);
-
-      preview.src = url;
-
-      preview.style.display = "block";
-
-      previewEmpty.style.display = "none";
-
-      removePhoto.style.display = "block";
-
-      fileName.textContent = file.name;
-
-      beforeImage.src = url;
-
-      beforeImage.style.display = "block";
-
-      beforePlaceholder.style.display = "none";
+</section>
 
 
-      showToast("Foto carregada com sucesso! ✨");
+<section>
 
-    }
+  <div class="container">
+
+    <div class="cta">
+
+      <div class="eyebrow">
+        EditaAI
+      </div>
+
+      <h2>
+        Sua próxima foto pode começar aqui.
+      </h2>
+
+      <p>
+        Envie uma imagem e experimente seu novo editor de fotos.
+      </p>
+
+      <button
+        class="primary"
+        onclick="scrollToEditor()"
+      >
+        🚀 Começar agora
+      </button>
+
+    </div>
+
+  </div>
+
+</section>
+
+</main>
 
 
-    fileInput.addEventListener(
-      "change",
-      function() {
+<footer>
 
-        if (this.files.length) {
+  <div class="container footer-inner">
 
-          handleFile(this.files[0]);
+    <div>
+      © 2026 EditaAI
+    </div>
 
-        }
+    <div>
+      Feito para transformar suas fotos ✨
+    </div>
 
-      }
-    );
+  </div>
+
+</footer>
 
 
-    /* DRAG AND DROP */
+<div class="toast" id="toast"></div>
 
-    ["dragenter", "dragover"].forEach(eventName => {
 
-      dropzone.addEventListener(
-        eventName,
-        e => {
+<script>
 
-          e.preventDefault();
+const fileInput=document.getElementById("fileInput");
+const dropzone=document.getElementById("dropzone");
+const preview=document.getElementById("preview");
+const previewEmpty=document.getElementById("previewEmpty");
+const removePhoto=document.getElementById("removePhoto");
+const fileName=document.getElementById("fileName");
 
-          dropzone.classList.add("dragover");
+const prompt=document.getElementById("prompt");
+const counter=document.getElementById("counter");
 
-        }
-      );
+const editButton=document.getElementById("editButton");
 
+const process=document.getElementById("process");
+const processText=document.getElementById("processText");
+const processPercent=document.getElementById("processPercent");
+const barFill=document.getElementById("barFill");
+
+const beforeImage=document.getElementById("beforeImage");
+const beforePlaceholder=document.getElementById("beforePlaceholder");
+
+const toast=document.getElementById("toast");
+
+let selectedFile=null;
+
+
+/* TOAST */
+
+function showToast(message){
+
+  toast.textContent=message;
+
+  toast.classList.add("show");
+
+  setTimeout(()=>{
+    toast.classList.remove("show");
+  },3000);
+
+}
+
+
+/* SCROLL */
+
+function scrollToEditor(){
+
+  document
+    .getElementById("editor")
+    .scrollIntoView({
+      behavior:"smooth"
     });
 
-
-    ["dragleave", "drop"].forEach(eventName => {
-
-      dropzone.addEventListener(
-        eventName,
-        e => {
-
-          e.preventDefault();
-
-          dropzone.classList.remove("dragover");
-
-        }
-      );
-
-    });
+}
 
 
-    dropzone.addEventListener(
-      "drop",
-      e => {
+/* FOTO */
 
-        const file = e.dataTransfer.files[0];
+function handleFile(file){
 
-        handleFile(file);
+  if(!file)return;
 
-      }
+  if(!file.type.startsWith("image/")){
+
+    showToast("Escolha uma imagem válida.");
+
+    return;
+  }
+
+  if(file.size>10*1024*1024){
+
+    showToast("A imagem precisa ter no máximo 10 MB.");
+
+    return;
+  }
+
+  selectedFile=file;
+
+  const url=URL.createObjectURL(file);
+
+  preview.src=url;
+
+  preview.style.display="block";
+
+  previewEmpty.style.display="none";
+
+  removePhoto.style.display="block";
+
+  fileName.textContent=file.name;
+
+  beforeImage.src=url;
+
+  beforeImage.style.display="block";
+
+  beforePlaceholder.style.display="none";
+
+  showToast("Foto carregada com sucesso! ✨");
+
+}
+
+
+/* UPLOAD */
+
+fileInput.addEventListener("change",function(){
+
+  if(this.files.length){
+
+    handleFile(this.files[0]);
+
+  }
+
+});
+
+
+/* ARRASTAR */
+
+["dragenter","dragover"].forEach(eventName=>{
+
+  dropzone.addEventListener(eventName,e=>{
+
+    e.preventDefault();
+
+    dropzone.classList.add("dragover");
+
+  });
+
+});
+
+
+["dragleave","drop"].forEach(eventName=>{
+
+  dropzone.addEventListener(eventName,e=>{
+
+    e.preventDefault();
+
+    dropzone.classList.remove("dragover");
+
+  });
+
+});
+
+
+dropzone.addEventListener("drop",e=>{
+
+  const file=e.dataTransfer.files[0];
+
+  handleFile(file);
+
+});
+
+
+/* REMOVER */
+
+removePhoto.addEventListener("click",e=>{
+
+  e.preventDefault();
+  e.stopPropagation();
+
+  selectedFile=null;
+
+  fileInput.value="";
+
+  preview.src="";
+  preview.style.display="none";
+
+  previewEmpty.style.display="block";
+
+  removePhoto.style.display="none";
+
+  fileName.textContent="Nenhuma foto";
+
+  beforeImage.src="";
+  beforeImage.style.display="none";
+
+  beforePlaceholder.style.display="flex";
+
+  showToast("Foto removida.");
+
+});
+
+
+/* CONTADOR */
+
+prompt.addEventListener("input",()=>{
+
+  counter.textContent=
+    prompt.value.length+"/500";
+
+});
+
+
+/* SUGESTÕES */
+
+document.querySelectorAll(".chip").forEach(chip=>{
+
+  chip.addEventListener("click",()=>{
+
+    prompt.value=chip.dataset.prompt;
+
+    prompt.dispatchEvent(
+      new Event("input")
     );
 
+    prompt.focus();
 
-    /* REMOVER FOTO */
+  });
 
-    removePhoto.addEventListener(
-      "click",
-      e => {
-
-        e.preventDefault();
-
-        e.stopPropagation();
-
-        selectedFile = null;
-
-        fileInput.value = "";
-
-        preview.src = "";
-
-        preview.style.display = "none";
-
-        previewEmpty.style.display = "block";
-
-        removePhoto.style.display = "none";
-
-        fileName.textContent = "Nenhuma foto";
-
-        beforeImage.src = "";
-
-        beforeImage.style.display = "none";
-
-        beforePlaceholder.style.display = "flex";
-
-        showToast("Foto removida.");
-
-      }
-    );
+});
 
 
-    /* CONTADOR */
+/* BOTÃO */
 
-    prompt.addEventListener(
-      "input",
-      () => {
+editButton.addEventListener("click",()=>{
 
-        counter.textContent =
-          prompt.value.length + "/500";
+  if(!selectedFile){
 
-      }
-    );
+    showToast("Primeiro envie uma foto. 📸");
 
+    return;
+  }
 
-    /* SUGESTÕES */
+  if(!prompt.value.trim()){
 
-    document
-      .querySelectorAll(".chip")
-      .forEach(chip => {
+    showToast("Digite o que você quer alterar na foto.");
 
-        chip.addEventListener(
-          "click",
-          () => {
+    prompt.focus();
 
-            prompt.value =
-              chip.dataset.prompt;
+    return;
+  }
 
-            prompt.dispatchEvent(
-              new Event("input")
-            );
+  process.classList.add("show");
 
-            prompt.focus();
+  editButton.classList.add("loading");
 
-          }
+  editButton.textContent="⏳ Preparando...";
+
+  let progress=0;
+
+  const steps=[
+    "Recebendo sua foto...",
+    "Entendendo seu pedido...",
+    "Preparando a edição...",
+    "Quase pronto..."
+  ];
+
+  let step=0;
+
+  const interval=setInterval(()=>{
+
+    progress+=10;
+
+    barFill.style.width=progress+"%";
+
+    processPercent.textContent=
+      progress+"%";
+
+    if(
+      progress===30 ||
+      progress===60 ||
+      progress===80
+    ){
+
+      step++;
+
+      processText.textContent=
+        steps[Math.min(step,steps.length-1)];
+
+    }
+
+    if(progress>=100){
+
+      clearInterval(interval);
+
+      processText.textContent=
+        "Interface preparada!";
+
+      editButton.classList.remove("loading");
+
+      editButton.textContent=
+        "✨ Editar com IA";
+
+      setTimeout(()=>{
+
+        showToast(
+          "A interface está pronta. Falta conectar o motor de IA."
         );
 
-      });
+      },300);
 
+    }
 
-    /* BOTÃO IA */
+  },180);
 
-    editButton.addEventListener(
-      "click",
-      () => {
+});
 
-        if (!selectedFile) {
-
-          showToast(
-            "Primeiro envie uma foto. 📸"
-          );
-
-          return;
-        }
-
-
-        if (!prompt.value.trim()) {
-
-          showToast(
-            "Digite o que você quer alterar na foto."
-          );
-
-          prompt.focus();
-
-          return;
-        }
-
-
-        process.classList.add("show");
-
-        editButton.classList.add("loading");
-
-        editButton.textContent =
-          "⏳ Preparando...";
-
-
-        let progress = 0;
-
-
-        const steps = [
-          "Recebendo sua foto...",
-          "Entendendo seu pedido...",
-          "Preparando a edição...",
-          "Quase pronto..."
-        ];
-
-
-        let step = 0;
-
-
-        const interval =
-          setInterval(() => {
-
-            progress += 10;
-
-            barFill.style.width =
-              progress + "%";
-
-            processPercent.textContent =
-              progress + "%";
-
-
-            if (
-              progress === 30 ||
-              progress === 60 ||
-              progress === 80
-            ) {
-
-              step++;
-
-              processText.textContent =
-                steps[
-                  Math.min(
-                    step,
-                    steps.length - 1
-                  )
-                ];
-
-            }
-
-
-            if (progress >= 100) {
-
-              clearInterval(interval);
-
-              processText.textContent =
-                "Interface preparada!";
-
-              editButton.classList.remove(
-                "loading"
-              );
-
-              editButton.textContent =
-                "✨ Editar com IA";
-
-
-              setTimeout(() => {
-
-                showToast(
-                  "A interface está pronta. Agora falta conectar o motor de IA."
-                );
-
-              }, 300);
-
-            }
-
-          }, 180);
-
-      });
-
-
-  </script>
+</script>
 
 </body>
 </html>
